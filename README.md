@@ -1,13 +1,28 @@
 # WatchShop
-A sample ASP.NET Project with Clean Architecture based on
-https://github.com/dotnet-architecture/eShopOnWeb.
+A sample ASP.NET Project with Clean Architecture based on https://github.com/dotnet-architecture/eShopOnWeb.
 
-## Web
+## Packages Installed
+### Web
 
-## Infrastructure
+### Infrastructure
 Install-Package Microsoft.EntityFrameworkCore
+
 Install-Package Npgsql.EntityFrameworkCore.PostgreSQL
 
+Install-Package Ardalis.Specification.EntityFrameworkCore
 
-## ApplicationCore
+Install-Package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+### ApplicationCore
 Install-Package Ardalis.Specification
+
+## EF Commands
+**Default project: src\Infrastructure**
+
+Add-Migration InitialIdentity -Context AppIdentityDbContext -OutputDir "Identity/Migrations"
+
+Update-Database -Context AppIdentityDbContext
+
+Add-Migration InitialApp -Context ApplicationDbContext -OutputDir "Data/Migrations"
+
+Update-Database -Context ApplicationDbContext .Specification
