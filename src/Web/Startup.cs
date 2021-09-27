@@ -32,6 +32,7 @@ namespace Web
             services.AddDatabaseDeveloperPageExceptionFilter();
             //burdada ApplicationDbContext i AppIdentityDbContext dedik
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppIdentityDbContext>();
             services.AddControllersWithViews();
         }
