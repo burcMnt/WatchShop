@@ -1,3 +1,4 @@
+using ApplicationCore.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Web.Interfaces;
+using Web.Services;
 
 namespace Web
 {
@@ -28,8 +31,13 @@ namespace Web
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("ApplicationDbContext")));
+            //Belirli bir türle <T> IAsyncRepo generic olarak talep edildiðinde ayný türle EFRepo<T> hizmeti enjecte edilecektir.
+            services.AddScoped(typeof(IAsyncRepository<>), typeof(EFRepository<>));
+
+            services.AddScoped<IHomeViewModelService, HomeViewModelService>();
 
             services.AddDatabaseDeveloperPageExceptionFilter();
+
             //burdada ApplicationDbContext i AppIdentityDbContext dedik
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
