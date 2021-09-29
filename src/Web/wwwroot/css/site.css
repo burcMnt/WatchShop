@@ -82,7 +82,7 @@ body {
     -webkit-box-orient: vertical;
 }
 
-..product-image {
+.product-image {
     transition: all .5s;
     padding: 1rem;
 }
