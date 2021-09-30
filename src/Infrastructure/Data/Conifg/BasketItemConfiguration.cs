@@ -18,7 +18,7 @@ namespace Infrastructure.Data.Conifg
                 .HasForeignKey(x => x.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasOne<Basket>()
-                .WithMany(x => x.Item)
+                .WithMany(x => x.Items)
                 .HasForeignKey(x => x.BasketId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
