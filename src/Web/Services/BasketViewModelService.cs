@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Web.Interfaces;
+using Web.ViewModels;
 
 namespace Web.Services
 {
@@ -15,15 +16,29 @@ namespace Web.Services
     {
         private readonly IHttpContextAccessor _httpContextAccesor;
         private readonly IAsyncRepository<Basket> _basketRepository;
+        private readonly IBasketService _basketService;
 
-        public BasketViewModelService(IHttpContextAccessor httpContextAccesor,IAsyncRepository<Basket> basketRepository)
+        public BasketViewModelService(IHttpContextAccessor httpContextAccesor,IAsyncRepository<Basket> basketRepository,IBasketService basketService)
         {
+
             _httpContextAccesor = httpContextAccesor;
             _basketRepository = basketRepository;
+            _basketService = basketService;
         }
-        public Task<int> BasketItemsCountAsync()
+
+        public async Task<BasketItemAddedViewModel> AddItemToBasket(int productId, int quantity)
         {
-            throw new NotImplementedException();
+            //Get or Create basket id / sepeti getir yoksa oluştur
+            var basketId = await GetOrCreateBasketIdAsync();
+
+            //Add item to the basket / sepete ögeyi ekle
+            await _basketService.AddItemToBasketAsync(basketId, productId, quantity);
+
+            //Return items count in the basket / sepetteki öge sayısını getir ve döndür
+            return new BasketItemAddedViewModel()
+            {
+                ItemsCount = await _basketService.BasketItemsCountAsync(basketId)
+            };
         }
 
         public async Task<int> GetOrCreateBasketIdAsync()
@@ -37,14 +52,14 @@ namespace Web.Services
                 Basket basket = await _basketRepository.FirstOrDefaultAsync(spec);
                 if (basket != null) return basket.Id;
 
-                //If not,create a new basket/loginse ve sepeti yoksa oluştur
+                //If not,create a new basket with the logged in user id antd return its id/loginse ve sepeti yoksa oluştur
                 return (await CreateBasketAsync(userId)).Id;
 
             }
 
             //Is there a basket cookie? / login degilse sepet cookie var mı varsa Id dondür
             var anonymousUserId = _httpContextAccesor.HttpContext.Request.Cookies[Constants.BASKET_COOKIENAME];
-            if (anonymousUserId != null)
+            if (!string.IsNullOrEmpty(anonymousUserId))
             {
                 var spec = new BasketSpecification(anonymousUserId);
                 Basket basket = await _basketRepository.FirstOrDefaultAsync(spec);
