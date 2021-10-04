@@ -18,7 +18,7 @@ namespace Web.Services
         private readonly IAsyncRepository<Basket> _basketRepository;
         private readonly IBasketService _basketService;
 
-        public BasketViewModelService(IHttpContextAccessor httpContextAccesor,IAsyncRepository<Basket> basketRepository,IBasketService basketService)
+        public BasketViewModelService(IHttpContextAccessor httpContextAccesor, IAsyncRepository<Basket> basketRepository, IBasketService basketService)
         {
 
             _httpContextAccesor = httpContextAccesor;
@@ -26,7 +26,7 @@ namespace Web.Services
             _basketService = basketService;
         }
 
-        public async Task<BasketItemAddedViewModel> AddItemToBasket(int productId, int quantity)
+        public async Task<BasketItemAddedViewModel> AddItemToBasketAsync(int productId, int quantity)
         {
             //Get or Create basket id / sepeti getir yoksa oluştur
             var basketId = await GetOrCreateBasketIdAsync();
@@ -41,9 +41,26 @@ namespace Web.Services
             };
         }
 
+        public async Task<NavbarBasketViewModel> GetNavbarBasketViewModelAsync()
+        {
+            return new NavbarBasketViewModel()
+            {
+                ItemsCount = await BasketItemsCountAsync()
+            };
+        }
+
+        //This method does not create a basket if non exists.
+        private async Task<int> BasketItemsCountAsync()
+        {
+            var basketId = await GetBasketIdAsync();
+            return basketId.HasValue ? await _basketService.BasketItemsCountAsync(basketId.Value) : 0;
+
+        }
+
         public async Task<int> GetOrCreateBasketIdAsync()
         {
             string userId = _httpContextAccesor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             //Is there logged in user ? / kullanıcı Login mi?
             if (!string.IsNullOrEmpty(userId))
             {
@@ -59,16 +76,19 @@ namespace Web.Services
 
             //Is there a basket cookie? / login degilse sepet cookie var mı varsa Id dondür
             var anonymousUserId = _httpContextAccesor.HttpContext.Request.Cookies[Constants.BASKET_COOKIENAME];
+
             if (!string.IsNullOrEmpty(anonymousUserId))
             {
                 var spec = new BasketSpecification(anonymousUserId);
                 Basket basket = await _basketRepository.FirstOrDefaultAsync(spec);
-                return basket.Id; 
+                return basket.Id;
             }
             //If not,create a new basket with the anonymous user id and return its id / sepet cooki yoksa oluştur
             anonymousUserId = Guid.NewGuid().ToString();
-            _httpContextAccesor.HttpContext.Response.Cookies.Append(Constants.BASKET_COOKIENAME, anonymousUserId, new 
-                CookieOptions() { Expires = DateTime.Now.AddMonths(1), IsEssential = true });
+            _httpContextAccesor.HttpContext.Response.Cookies.Append(Constants.BASKET_COOKIENAME, anonymousUserId, new
+                CookieOptions()
+            { Expires = DateTime.Now.AddMonths(1), IsEssential = true });
+
             //sepet id döndür
             return (await CreateBasketAsync(anonymousUserId)).Id;
         }
@@ -80,6 +100,46 @@ namespace Web.Services
                 BuyerId = buyerId
             };
             return await _basketRepository.AddAsync(basket);
+        }
+
+        public async Task<BasketViewModel> GetBasketViewModelAsync()
+        {
+            var basketId = await GetBasketIdAsync();
+            var vm = new BasketViewModel();
+            if (!basketId.HasValue) return vm;
+            // sepeti öğeleri ile birlikte döndür
+            var spec = new BasketWithItemsAndProductsSpecification(basketId.Value);
+            var basket =await _basketRepository.FirstOrDefaultAsync(spec);
+            vm.Items = basket.Items.Select(x => new BasketItemVievModel()
+            {
+                Id = x.Id,
+                ProductId = x.ProductId,
+                ProductName = x.Product.ProductName,
+                PictureUri = x.Product.PictureUri,
+                Price = x.Product.Price,
+                Quantity = x.Quantity
+            }).ToList();
+            vm.TotalPtice = vm.Items.Sum(x => x.Quantity * x.Price);
+
+            return vm;
+        }
+
+        public async Task<int?> GetBasketIdAsync()
+        {
+            string userId = _httpContextAccesor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var anonymousUserId = _httpContextAccesor.HttpContext.Request.Cookies[Constants.BASKET_COOKIENAME];
+            var buyerId = userId ?? anonymousUserId;
+            if (buyerId != null)
+            {
+                var spec = new BasketSpecification(buyerId);
+                var basket = await _basketRepository.FirstOrDefaultAsync(spec);
+                if (basket != null)
+                {
+                    return basket.Id;
+                }
+            }
+
+            return null;
         }
     }
 }
