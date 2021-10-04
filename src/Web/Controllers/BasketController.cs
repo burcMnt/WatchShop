@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Interfaces;
 
@@ -21,6 +22,12 @@ namespace Web.Controllers
         public async Task<IActionResult> AddItem(int productId,int quantity=1)
         {
             return Json(await _basketViewModelService.AddItemToBasketAsync(productId,quantity));
+        }
+
+        [HttpPost,ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(Dictionary<int,int> quantities)
+        {
+            return RedirectToAction("Index");
         }
     }
 }
