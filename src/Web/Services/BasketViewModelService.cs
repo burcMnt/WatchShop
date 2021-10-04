@@ -116,10 +116,10 @@ namespace Web.Services
                 ProductId = x.ProductId,
                 ProductName = x.Product.ProductName,
                 PictureUri = x.Product.PictureUri,
-                Price = x.Product.Price,
+                UnitPrice = x.Product.Price,
                 Quantity = x.Quantity
             }).ToList();
-            vm.TotalPtice = vm.Items.Sum(x => x.Quantity * x.Price);
+            vm.TotalPrice = vm.Items.Sum(x => x.Quantity * x.UnitPrice);
 
             return vm;
         }

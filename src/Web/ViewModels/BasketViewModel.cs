@@ -8,6 +8,6 @@ namespace Web.ViewModels
     public class BasketViewModel
     {
         public List<BasketItemVievModel> Items { get; set; } = new List<BasketItemVievModel>();
-        public decimal TotalPtice { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 }
