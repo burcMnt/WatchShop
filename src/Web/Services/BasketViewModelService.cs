@@ -80,7 +80,7 @@ namespace Web.Services
             {
                 var spec = new BasketSpecification(anonymousUserId);
                 Basket basket = await _basketRepository.FirstOrDefaultAsync(spec);
-                return basket.Id;
+                if (basket != null) return basket.Id;
             }
             //If not,create a new basket with the anonymous user id and return its id / sepet cooki yoksa oluştur
             anonymousUserId = Guid.NewGuid().ToString();

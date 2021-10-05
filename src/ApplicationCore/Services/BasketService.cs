@@ -88,6 +88,18 @@ namespace ApplicationCore.Services
             await _basketRepository.UpdateAsync(basket);
         }
 
+
+        public Task TransferBasketAsync(string fromBuyerId, string toBuyerId)
+        {
+            //get from buyer basket(if null,return)
+
+            //get toBuyer basket (if null,creat)
+
+            //transfer items
+
+            //delete fromBuyerBasket
+        }
+
         private async Task<Basket> GetBasketWithItemsAsync(int basketId)
         {
             var spec = new BasketWithItemsSpecification(basketId);

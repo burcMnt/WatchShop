@@ -45,7 +45,7 @@ namespace Web.Controllers
             return RedirectToAction("Index");
         }
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int basketItemId)
+        public async Task<IActionResult> Delete()
         {
             int basketId = await _basketViewModelService.GetOrCreateBasketIdAsync();
             await _basketService.DeleteBasketAsync(basketId);
