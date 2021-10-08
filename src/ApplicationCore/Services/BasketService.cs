@@ -80,7 +80,7 @@ namespace ApplicationCore.Services
                 {
                     if (newValue < 1)
                     {
-                        throw new ArgumentException("Quantity must be positive number");
+                        throw new ArgumentOutOfRangeException("Quantity must be positive number");
                     }
                     item.Quantity = newValue;
                 }
