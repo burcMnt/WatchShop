@@ -28,10 +28,10 @@ namespace Web
         {
             //Bu iki db contex ekledik
             services.AddDbContext<AppIdentityDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("AppIdentityDbContext")));
+                options.UseSqlServer(Configuration.GetConnectionString("AppIdentityDbContext")));
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("ApplicationDbContext")));
+                options.UseSqlServer(Configuration.GetConnectionString("ApplicationDbContext")));
             //Belirli bir türle <T> IAsyncRepo generic olarak talep edildiðinde ayný türle EFRepo<T> hizmeti enjecte edilecektir.
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EFRepository<>));
 
